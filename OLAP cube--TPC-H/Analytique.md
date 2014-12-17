@@ -87,7 +87,9 @@ Classement national des produits vendus en plus grande quantité.
 WITH T AS(
 			select 
 				N_NAME,
-				P_PARTKEY,SUM(L_QUANTITY) AS QUANTITY, RANK() OVER (PARTITION BY N_NAME ORDER BY SUM(L_QUANTITY) desc) AS RANG
+				P_PARTKEY,
+				SUM(L_QUANTITY) AS QUANTITY, 
+				RANK() OVER (PARTITION BY N_NAME ORDER BY SUM(L_QUANTITY) desc) AS RANG
 			FROM 
 				PART,
 				CUSTOMER,
