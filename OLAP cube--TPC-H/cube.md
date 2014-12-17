@@ -1,5 +1,8 @@
 # Cube : manipulation de données multi-dimensionnellles OLAP
 
+![alt text](http://upload.wikimedia.org/wikipedia/commons/9/95/Cube.png "screen 1")
+http://upload.wikimedia.org/wikipedia/commons/9/95/Cube.png
+
 ### Contexte
 Dans le cadre du cours Bases de Données Large Echelle [BDLE] UE (5I852), on est ramené à  calculer, transformer et interroger un cube en SQL sur la base [TPC-H Benchmark] et à répondre aux question du [sujet].
 
