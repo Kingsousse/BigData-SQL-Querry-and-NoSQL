@@ -81,6 +81,100 @@ d1.reduceByKey(_+_)
 cpt.collect.toSeq.sortBy(-_._2)
 ```
 
+# Calculs sur des graphes en M/R - Spark
+
+####### Simple pageRank programme
+
+```scala
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+import org.apache.spark.SparkContext._
+import org.apache.spark.{SparkConf, SparkContext, HashPartitioner}
+
+/**
+ * Computes the PageRank of URLs from an input file. Input file should
+ * be in format of:
+ * URL         neighbor URL
+ * URL         neighbor URL
+ * URL         neighbor URL
+ * ...
+ * where URL and their neighbors are separated by space(s).
+ */
+object SparkPageRank {
+  def main(args: Array[String]) {
+    val sparkConf = new SparkConf().setAppName("PageRank V1")
+    var iters = args(1).toInt
+    val ctx = new SparkContext(sparkConf)
+    val lines = ctx.textFile(args(0), 4)
+    val links = lines.map{ s =>
+      val parts = s.split(",")
+      (parts(0), parts(1))
+    }.groupByKey().map(url=>(url._1, (url._2, url._2.size))).cache()
+
+    var ranks = links.groupByKey().map(url => (url._1,1.0))
+
+    for (i <- 1 to iters) {
+      val contribs = links.join(ranks).flatMap{ case (url, ((links,size), rank)) =>
+      	  links.map(url => (url, rank / size))
+      }
+      ranks = contribs.reduceByKey(_ + _).mapValues(0.15 + 0.85 * _)
+    }
+
+    val output = ranks.collect()
+    output.foreach(tup => println(tup._1 + " has rank: " + tup._2 + "."))
+
+    ctx.stop()
+  }
+}
+
+```
+
+la résultat c'est : 
+```shell
+2441 has rank: 0.24586389596627822.
+2764 has rank: 0.3137267666755489.
+1873 has rank: 0.9046737910222268.
+1004 has rank: 0.1548035284241112.
+1983 has rank: 0.16392253840636256.
+3394 has rank: 4.557221058883569.
+3299 has rank: 0.8495475867568956.
+128 has rank: 0.17799237814508012.
+2595 has rank: 0.4256211143208093.
+601 has rank: 0.24330216560982992.
+2063 has rank: 0.1721382862814687.
+3680 has rank: 0.3069048530883141.
+2504 has rank: 0.5141683893943134.
+917 has rank: 0.1793903503367873.
+821 has rank: 0.19129007871028003.
+1073 has rank: 0.17874194051812156.
+931 has rank: 0.17039190019470415.
+458 has rank: 0.20799388841323513.
+3783 has rank: 0.2948242898863366.
+2720 has rank: 0.15373551698210836.
+1282 has rank: 0.2635769227632171.
+98 has rank: 0.17870408907402094.
+2665 has rank: 0.15048308022815618.
+```
+
+####### 
+
+
 [sujet]:http://dac.lip6.fr/master/wp-content/uploads/2014/10/TME1-Etudiants.pdf
 [BDLE]:http://dac.lip6.fr/master/ues-2014-2015/bdle-2014-2015/
 [TPC-H Benchmark]:http://www-master.ufr-info-p6.jussieu.fr/2005/IMG/naacke/bdwa/bdwa2006/extra/tme/tpch-spec-2.3.0.pdf
