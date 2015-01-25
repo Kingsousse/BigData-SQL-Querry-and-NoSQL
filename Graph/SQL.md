@@ -1,6 +1,4 @@
-# Cube : manipulation de données multi-dimensionnellles OLAP
-
-![alt text](http://upload.wikimedia.org/wikipedia/commons/9/95/Cube.png "screen 1")
+# Graph
 
 
 ### Contexte
