@@ -2,4 +2,22 @@
 
 ```scala
 
+import org.apache.spark.graphx._
+
+import org.apache.spark.rdd.RDD
+
+ val fusers=sc.textFile("/user/etu11/facebook_users_prop.csv",4)
+ 
+ val edges = sc.textFile("/user/etu11/facebook_edges_prop.csv")
+ 
+ val RDD_users = fusers.map(x=>x.split(","))
+
+ val users:RDD[(VertexId, (String,String,Int))] = RDD_users.map(x => (x(0).toLong,(x(1),x(2),x(3).toInt)))
+
+ val relationships: RDD[Edge[(String,Int)]] = RDD_edges.map(x=> Edge(x(0).toLong,x(1).toLong,(x(2),x(3).toInt)))
+ 
+ val graph = Graph.apply(users,relationships) 
+ 
+ 
+
 ```
